@@ -7,13 +7,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="<?php echo URL; ?>boutique.php">Site Ma Boutique</a>
+          <a class="navbar-brand" href="<?php echo URL; ?>template_bootstrap.php">Site Ma Boutique</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
 
-            <li class=""><a href="<?php echo URL; ?>boutique.php">Accueil</a></li>
-            <li class=""><a href="<?php echo URL; ?>panier.php">Panier</a></li>
+            <li class=""><a href="<?php echo URL; ?>template_bootstrap.php">Accueil</a></li>
+            <li class=""><a href="<?php echo URL; ?>template_bootstrap.php">Panier</a></li>
 
 
             <?php 

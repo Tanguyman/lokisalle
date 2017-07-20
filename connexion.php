@@ -11,7 +11,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'deconnexion')
 // vérification si l'utilisateur est connecté, sinon redirection
 if(utilisateur_est_connecte())
 {
-    header("location:profil.php");
+    header("location:template_bootstrap.php");
 }
 
 // vérification de l'existence des indices du formulaire
@@ -40,11 +40,9 @@ if(isset($_POST['pseudo']) && isset($_POST['mdp']))
         $_SESSION['utilisateur']['nom'] = $info_utilisateur['nom'];
         $_SESSION['utilisateur']['prenom'] = $info_utilisateur['prenom'];
         $_SESSION['utilisateur']['email'] = $info_utilisateur['email'];
-        $_SESSION['utilisateur']['sexe'] = $info_utilisateur['sexe'];
-        $_SESSION['utilisateur']['ville'] = $info_utilisateur['ville'];
-        $_SESSION['utilisateur']['cp'] = $info_utilisateur['cp'];
-        $_SESSION['utilisateur']['adresse'] = $info_utilisateur['adresse'];
+        $_SESSION['utilisateur']['civilite'] = $info_utilisateur['civilite'];
         $_SESSION['utilisateur']['statut'] = $info_utilisateur['statut'];
+        $_SESSION['utilisateur']['date_enregistrement'] = $info_utilisateur['date_enregistrement'];
 
         // on redirige sur profil
         header("location:profil.php");

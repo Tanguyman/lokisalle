@@ -16,7 +16,7 @@ if(!utilisateur_est_admin())
     $req_table_salle = $pdo->query("SELECT * FROM salle");
 
 
-// récup des données du formulaire pour insertion dans la bdd 
+// récup des données du formulaire pour insertion dans la bdd
 // variables de récupération
 $titre = "";
 $description = "";
@@ -165,7 +165,7 @@ if(isset($_POST['titre']) && isset($_POST['description']) && isset($_POST['capac
 
 
 
-/////////////////////////////////////////////MODIFICATION SALLE///////////////////////////////////////////
+/////////////////////////////////////////////MODIFICATION SALLE/////////////////////////////////////////// A FAIRE
 // quand on clique sur modifier, on doit récupérer toutes les valeurs de la salle et pré-remplir les champs du formulaire
 
 // vérification de l'activation de l'option modifier
@@ -246,8 +246,7 @@ require("inc/nav.inc.php");
 
         <div class="starter-template">
             <h1><span class="glyphicon glyphicon-user"></span> Gestion des salles</h1>
-            <?php //echo $message; // messages destinés à l'utilisateur ?>
-            <?= $message; // cette balise php inclue un echo, elle est équivalente à la ligne du dessus ?>
+            <?= $message; ?>
         </div>
 
 
@@ -310,7 +309,7 @@ require("inc/nav.inc.php");
             <button class="btn btn-primary" id="masquer" style="display: none;">Masquer le formulaire</button>
         </div>
 
-        <!-- formulaire d'ajout Affichage conditionnel à Faire ! -->
+        <!-- formulaire d'ajout Affichage conditionnel -->
         <div class="row">
 
             <form action="" method="post" enctype="multipart/form-data" id="formAjout" style="display: none;">
@@ -375,10 +374,10 @@ require("inc/nav.inc.php");
                     </div>
                     <input type="submit" class="form-control btn btn-primary" value="Valider">
 
-                </div><!-- fin .col-sm-6 -->        
-            
+                </div><!-- fin .col-sm-6 -->
+
             </form>
-        
+
         </div><!-- fin .row -->
 
     </div><!-- /.container -->

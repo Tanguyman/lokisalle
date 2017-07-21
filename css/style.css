@@ -34,3 +34,10 @@ table img {
 label.recherche {
     font-size: 12px;
 }
+
+
+
+/* mise en page Alex */
+form#formAjout {
+    margin: 100px auto;
+}

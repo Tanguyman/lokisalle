@@ -64,7 +64,9 @@ if(isset($_POST['titre']) && isset($_POST['description']) && isset($_POST['capac
             // vérification du chargement d'une image
             if(!empty($_FILES['photo']['name']))
             {
-                $photo_bdd = $titre . '_' . $_FILES['photo']['name'];
+                // virer les espaces dans le titre si il y en a
+                $titre_propre = str_replace(" ", "-", $titre);
+                $photo_bdd = $titre_propre . '_' . $_FILES['photo']['name'];
             }
             else{
                 $message .= '<div class="alert alert-danger" role="alert" style="margin-top: 20px;">La photo de la salle est obligatoire.</div>';
@@ -157,6 +159,9 @@ if(isset($_POST['titre']) && isset($_POST['description']) && isset($_POST['capac
     $req_insertion_salle->bindParam(':photo', $photo_bdd, PDO::PARAM_STR);
     $req_insertion_salle->execute();
 
+    // rechargement de la page (à défaut de mieux)
+    header("location:gestion_salle.php");
+
 
 } // fin des isset($_POST['qquechose'])
 ///////////////////////////////////////////////FIN AJOUT SALLE////////////////////////////////////////////
@@ -165,13 +170,36 @@ if(isset($_POST['titre']) && isset($_POST['description']) && isset($_POST['capac
 
 
 
-/////////////////////////////////////////////MODIFICATION SALLE/////////////////////////////////////////// A FAIRE
+/////////////////////////////////////////////MODIFICATION SALLE///////////////////////////////////////////
 // quand on clique sur modifier, on doit récupérer toutes les valeurs de la salle et pré-remplir les champs du formulaire
 
 // vérification de l'activation de l'option modifier
 if(isset($_GET['action']) && $_GET['action'] == 'modif')
 {
     $message .= '<div class="alert alert-danger" role="alert" style="margin-top: 20px;">T\'as appuyé sur le bouton modif.</div>';
+    // récupération des valeurs
+    $salle_a_modifier = $pdo->prepare("SELECT * FROM salle WHERE id_salle = :id_salle");
+    $salle_a_modifier->bindParam(":id_salle", $_GET['id_salle'], PDO::PARAM_STR);
+    $salle_a_modifier->execute();
+
+    $req_modif = $salle_a_modifier->fetch(PDO::FETCH_ASSOC);
+
+    $id_salle = $req_modif['id_salle'];
+    $titre = $req_modif['titre'];
+    $description = $req_modif['description'];
+    $capacite = $req_modif['capacite'];
+    $categorie = $req_modif['categorie'];
+    $pays = $req_modif['pays'];
+    $ville = $req_modif['ville'];
+    $adresse = $req_modif['adresse'];
+    $cp = $req_modif['cp'];
+    $photo = URL . "photo/" . $req_modif['photo']; // /!\ gérer le pré-remplissage du champ photo
+
+    // affichage du formulaire de modification.
+
+
+
+
 }
 
 
@@ -237,7 +265,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'suppr')
 require("inc/header.inc.php");
 require("inc/nav.inc.php");
 //echo '<pre>'; print_r($_POST); echo '</pre>';
-//echo '<pre>'; print_r($_GET); echo '</pre>';
+echo '<pre>'; print_r($_GET); echo '</pre>';
 ?>
 
 
@@ -288,7 +316,7 @@ require("inc/nav.inc.php");
                                     }
                                     // boutons action
                                     echo '<td>';
-                                        echo '<a href="?action=modif&id_salle=' . $var['id_salle'] . '" class="btn btn-warning"><span class="glyphicon glyphicon-pencil"></span></a>';
+                                        echo '<a href="?action=modif&id_salle=' . $var['id_salle'] . '" class="btn btn-warning modif" id="id-salle-' . $var['id_salle'] . '"><span class="glyphicon glyphicon-pencil" ></span></a>';
                                         echo '<a href="?action=suppr&id_salle=' . $var['id_salle'] . '" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></a>';
                                     echo '</td>';
                                 echo '</tr>';
@@ -316,6 +344,8 @@ require("inc/nav.inc.php");
             
                 <div class="col-sm-6">
 
+                    <!-- champ caché pour l'id à rajouter -->
+
                     <div class="form-group">
                         <label for="titre">Titre<span style="color: red;">*</span></label>
                         <input type="text" class="form-control" name="titre" id="titre" value="<?php echo $titre; ?>" placeholder="Titre de la salle" />
@@ -328,7 +358,7 @@ require("inc/nav.inc.php");
 
                     <div class="form-group">
                         <label for="photo">Photo<span style="color: red;">*</span></label>
-                        <input type="file" name="photo" id="photo" class="form-control"  />
+                        <input type="file" name="photo" id="photo" class="form-control" value="<?php echo $photo ?>"  />
                     </div>
 
                     <div class="form-group">
@@ -365,7 +395,7 @@ require("inc/nav.inc.php");
 
                     <div class="form-group">
                         <label for="adresse">Adresse<span style="color: red;">*</span></label>
-                        <textarea name="adresse" class="form-control" id="adresse" value="<?php echo $adresse; ?>" ></textarea>
+                        <textarea name="adresse" class="form-control" id="adresse" ><?php echo $adresse; ?></textarea>
                     </div>
 
                     <div class="form-group">

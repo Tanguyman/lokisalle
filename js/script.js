@@ -1,9 +1,14 @@
 // affichage conditionnel du formulaire d'ajout de salle + boutton masquer formulaire
-document.getElementById('ajouter').addEventListener('click', function() {
-    console.log('click');
-    document.getElementById('formAjout').style.display = "block";
-    document.getElementById('masquer').style.display = "inline-block";
-});
+var testAjouter = document.getElementById('ajouter');
+if (typeof testAjouter != 'undefined' && testAjouter != null) {
+
+    document.getElementById('ajouter').addEventListener('click', function() {
+        //console.log('click');
+        document.getElementById('formAjout').style.display = "block";
+        document.getElementById('masquer').style.display = "inline-block";
+    });
+
+}
 
 
 // affichage conditionnel du formulaire lors d'une modification des informations de la salle
@@ -33,9 +38,12 @@ if (typeof idSalle != "undefined") {
 
 
 // masquer le formulaire
-document.getElementById('masquer').addEventListener('click', function() {
-    console.log('mask');
-    document.getElementById('formAjout').style.display = "none";
-    document.getElementById('masquer').style.display = "none";
-    document.getElementById('titreModif').style.display = "none";
-})
+var testSupprimer = document.getElementById('masquer');
+if (typeof testSupprimer != 'undefined' && testSupprimer != null) {
+    document.getElementById('masquer').addEventListener('click', function() {
+        console.log('mask');
+        document.getElementById('formAjout').style.display = "none";
+        document.getElementById('masquer').style.display = "none";
+        document.getElementById('titreModif').style.display = "none";
+    })
+}

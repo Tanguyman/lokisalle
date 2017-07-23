@@ -1,11 +1,11 @@
 <?php
-require("inc/init.inc.php");
+require("../inc/init.inc.php");
 
 
 // controle de l'acces à la page -> réservé aux admins (status 1)
 if(!utilisateur_est_admin())
 {
-    header("location:../connexion.php");
+    header("../location:connexion.php");
     exit(); // pour ne pas exécuter la suite du code - arrêt de l'exécution du script - injection de script impossible via GET
 }
 
@@ -215,7 +215,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'modif')
                 $titre_propre = str_replace(" ", "-", $titre);
                 $photo_bdd = $titre_propre . '_' . $_FILES['photo']['name'];
             }
-            
+
             // vérification de l'extension du fichier: (acceptées: jpg / jpeg / png / gif)
                 // on isole l'extension
                 $extension = strrchr($_FILES['photo']['name'], '.');
@@ -318,8 +318,8 @@ if(isset($_GET['action']) && $_GET['action'] == 'suppr')
 
 
 // la ligne suivante commence les affichages dans la page
-require("inc/header.inc.php");
-require("inc/nav.inc.php");
+require("../inc/header.inc.php");
+require("../inc/nav.inc.php");
 //echo '<pre>'; print_r($_POST); echo '</pre>';
 echo '<pre>'; print_r($_GET); echo '</pre>';
 ?>
@@ -485,4 +485,4 @@ echo '<pre>'; print_r($_GET); echo '</pre>';
     </div><!-- /.container -->
 
     <?php
-    require("inc/footer.inc.php");
+    require("../inc/footer.inc.php");

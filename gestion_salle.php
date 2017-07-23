@@ -5,10 +5,8 @@ require("inc/init.inc.php");
 // controle de l'acces à la page -> réservé aux admins (status 1)
 if(!utilisateur_est_admin())
 {
-    // /!\ activer la redirection à la fin du dev de cette page
-    //header("location:../connexion.php");
-    //exit(); // pour ne pas exécuter la suite du code - arrêt de l'exécution du script - injection de script impossible via GET
-    $message .= '<div class="alert alert-danger" role="alert" style="margin-top: 20px;">Attention, t\'es pas admin!</div>';
+    header("location:../connexion.php");
+    exit(); // pour ne pas exécuter la suite du code - arrêt de l'exécution du script - injection de script impossible via GET
 }
 
 // affichage tableau
@@ -29,7 +27,7 @@ $adresse = "";
 $cp = "";
 
 /////////////////////////////////////////////////AJOUT SALLE///////////////////////////////////////////////
-if(isset($_POST['titre']) && isset($_POST['description']) && isset($_POST['capacite']) && isset($_POST['categorie']) && isset($_POST['pays']) && isset($_POST['ville']) && isset($_POST['adresse']) && isset($_POST['cp']) && utilisateur_est_admin())
+if(isset($_POST['titre']) && isset($_POST['description']) && isset($_POST['capacite']) && isset($_POST['categorie']) && isset($_POST['pays']) && isset($_POST['ville']) && isset($_POST['adresse']) && isset($_POST['cp']) && utilisateur_est_admin() && !isset($_GET['action']))
 {
     $titre = $_POST['titre'];
     $description = $_POST['description'];
@@ -184,6 +182,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'modif')
 
     $req_modif = $salle_a_modifier->fetch(PDO::FETCH_ASSOC);
 
+    // remplissage automatique des champs
     $id_salle = $req_modif['id_salle'];
     $titre = $req_modif['titre'];
     $description = $req_modif['description'];
@@ -193,12 +192,77 @@ if(isset($_GET['action']) && $_GET['action'] == 'modif')
     $ville = $req_modif['ville'];
     $adresse = $req_modif['adresse'];
     $cp = $req_modif['cp'];
-    $photo = URL . "photo/" . $req_modif['photo']; // /!\ gérer le pré-remplissage du champ photo
-
-    // affichage du formulaire de modification.
-
+    //on récupère la photo dans une nouvelle variable
+    $photo_actuelle = $req_modif['photo'];
 
 
+    if(isset($_POST['titre']) && isset($_POST['description']) && isset($_POST['capacite']) && isset($_POST['categorie']) && isset($_POST['pays']) && isset($_POST['ville']) && isset($_POST['adresse']) && isset($_POST['cp']) && utilisateur_est_admin() && isset($_GET['action']))
+    {
+        $titre = $_POST['titre'];
+        $description = $_POST['description'];
+        $capacite = $_POST['capacite'];
+        $categorie = $_POST['categorie'];
+        $pays = $_POST['pays'];
+        $ville = $_POST['ville'];
+        $adresse = $_POST['adresse'];
+        $cp = $_POST['cp'];
+
+        // ------------------------------ vérification du champ photo ---------------------------------
+            // vérification du chargement d'une image
+            if(!empty($_FILES['photo']['name']))
+            {
+                // virer les espaces dans le titre si il y en a
+                $titre_propre = str_replace(" ", "-", $titre);
+                $photo_bdd = $titre_propre . '_' . $_FILES['photo']['name'];
+            }
+            
+            // vérification de l'extension du fichier: (acceptées: jpg / jpeg / png / gif)
+                // on isole l'extension
+                $extension = strrchr($_FILES['photo']['name'], '.');
+
+                // on transforme $extension afin que tous les caractères soient en minuscule
+                $extension = strtolower($extension);
+
+                // on enlève le "."
+                $extension = substr($extension, 1);
+
+                // les extensions acceptées
+                $tab_extensions_valides = array("jpg", "jpeg", "png", "gif");
+
+                // comparaison de $extension avec celles autorisées
+                $verif_extension = in_array($extension, $tab_extensions_valides);
+
+        if($verif_extension)
+        {
+            // extension valide + pas d'erreur
+            $photo_dossier = RACINE_SERVEUR . 'photo/' . $photo_bdd;
+
+            copy($_FILES['photo']['tmp_name'], $photo_dossier);
+            // copy() permet de copier un fichier depuis un emplacement fourni en pemier argument vers un emplacement fourni en deuxième argument.
+        }
+        elseif(!$verif_extension) {
+            // si l'extension du fichier n'est pas valide
+            $message .= '<div class="alert alert-danger" role="alert" style="margin-top: 20px;">Format de l\'image invalide.<br /> extension acceptées:  "jpg", "jpeg", "png", "gif"</div>';
+            $erreur = true;
+        }
+        //----------------------------------------------------------------------------------------
+
+
+    // modification de la BDD
+    $req_modif = $pdo->prepare("UPDATE salle SET titre = :titre, description = :description, capacite = :capacite, categorie = :categorie, pays = :pays, ville = :ville, adresse = :adresse, cp = :cp, photo = :photo WHERE id_salle = :id_salle");
+    $req_modif->bindParam(":titre", $titre, PDO::PARAM_STR);
+    $req_modif->bindParam(":description", $description, PDO::PARAM_STR);
+    $req_modif->bindParam(":capacite", $capacite, PDO::PARAM_STR);
+    $req_modif->bindParam(":categorie", $categorie, PDO::PARAM_STR);
+    $req_modif->bindParam(":pays", $pays, PDO::PARAM_STR);
+    $req_modif->bindParam(":ville", $ville, PDO::PARAM_STR);
+    $req_modif->bindParam(":adresse", $adresse, PDO::PARAM_STR);
+    $req_modif->bindParam(":cp", $cp, PDO::PARAM_STR);
+    $req_modif->bindParam(":photo", $photo_bdd, PDO::PARAM_STR);
+    $req_modif->bindParam(":id_salle", $id_salle, PDO::PARAM_STR);
+    $req_modif->execute();
+
+    }
 
 }
 
@@ -249,15 +313,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'suppr')
 
 }
 
-
-
 ///////////////////////////////////////////FIN SUPPRESSION SALLE/////////////////////////////////////////
-
-
-
-
-
-
 
 
 
@@ -316,7 +372,7 @@ echo '<pre>'; print_r($_GET); echo '</pre>';
                                     }
                                     // boutons action
                                     echo '<td>';
-                                        echo '<a href="?action=modif&id_salle=' . $var['id_salle'] . '" class="btn btn-warning modif" id="id-salle-' . $var['id_salle'] . '"><span class="glyphicon glyphicon-pencil" ></span></a>';
+                                        echo '<a href="?action=modif&id_salle=' . $var['id_salle'] . '" class="btn btn-warning modif" id="id_salle=' . $var['id_salle'] . '"><span class="glyphicon glyphicon-pencil" ></span></a>';
                                         echo '<a href="?action=suppr&id_salle=' . $var['id_salle'] . '" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></a>';
                                     echo '</td>';
                                 echo '</tr>';
@@ -341,10 +397,14 @@ echo '<pre>'; print_r($_GET); echo '</pre>';
         <div class="row">
 
             <form action="" method="post" enctype="multipart/form-data" id="formAjout" style="display: none;">
+            <h2 style="display: none;" id="titreModif">Modification de salle</h2>
             
                 <div class="col-sm-6">
 
-                    <!-- champ caché pour l'id à rajouter -->
+                    <!-- champ caché pour l'id -->
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" name="id_salle" id="id_salle" value="<?php echo $id_salle; ?>" />
+                    </div>
 
                     <div class="form-group">
                         <label for="titre">Titre<span style="color: red;">*</span></label>
@@ -356,6 +416,18 @@ echo '<pre>'; print_r($_GET); echo '</pre>';
                         <textarea name="description" class="form-control" id="description" ><?php echo $description; ?></textarea>
                     </div>
 
+                    <?php
+                    // affichage de la photo actuelle dans le cas d'une modification d'article
+                        if(isset($req_modif)) // si cette variable existe alors nous sommes dans le cas d'une modification
+                        {
+                            echo '<div class="form-group">';
+                                echo '<label>Photo Actuelle</label><br />';
+                                echo '<img src="' . URL . 'photo/' . $photo_actuelle . '" class="img-thumbnail" width="150" />';
+                                // on crée un champs caché qui contiendra le nom de la photo afin de la récupérer dans le POST (validation)
+                                echo '<input type="hidden" name="ancienne_photo" value="' . $photo_actuelle . '" />';
+                            echo '</div>';
+                        }
+                    ?>
                     <div class="form-group">
                         <label for="photo">Photo<span style="color: red;">*</span></label>
                         <input type="file" name="photo" id="photo" class="form-control" value="<?php echo $photo ?>"  />
@@ -369,9 +441,9 @@ echo '<pre>'; print_r($_GET); echo '</pre>';
                     <div class="form-group">
                         <label for="categorie">Catégorie<span style="color: red;">*</span></label>
                         <select name="categorie" id="categorie" class="form-control" >
-                            <option value="reunion">Réunion</option>
-                            <option value="bureau">Bureau</option>
-                            <option value="formation">Formation</option>
+                            <option value="reunion" <?php if($categorie == 'reunion') { echo 'selected'; }?> >Réunion</option>
+                            <option value="bureau" <?php if($categorie == 'bureau') { echo 'selected'; }?> >Bureau</option>
+                            <option value="formation" <?php if($categorie == 'formation') { echo 'selected'; }?> >Formation</option>
                         </select>
                     </div>
 
@@ -387,9 +459,9 @@ echo '<pre>'; print_r($_GET); echo '</pre>';
                     <div class="form-group">
                         <label for="ville">Ville<span style="color: red;">*</span></label>
                         <select name="ville" id="ville" class="form-control" >
-                            <option value="paris">Paris</option>
-                            <option value="lyon">Lyon</option>
-                            <option value="marseille">Marseille</option>
+                            <option value="paris" <?php if($ville == 'paris') { echo 'selected'; }?> >Paris</option>
+                            <option value="lyon" <?php if($ville == 'lyon') { echo 'selected'; }?> >Lyon</option>
+                            <option value="marseille" <?php if($ville == 'marseille') { echo 'selected'; }?> >Marseille</option>
                         </select>
                     </div>
 

@@ -293,7 +293,10 @@ if($_POST)
                         //     $message .= "avec strpos La chaine '$id_salle' a été trouvée dans la chaîne '$tous_les_id_salle' et débute à la position $pos";
                         // }
 
-        // TEST AVEC preg_match
+        // TEST qui fonctionne AVEC preg_match
+        // https://openclassrooms.com/courses/concevez-votre-site-web-avec-php-et-mysql/les-expressions-regulieres-partie-1-2
+        // http://php.net/manual/fr/function.preg-match.php
+
         var_dump($tous_les_id_salle);
         $id_salle_existe = '#a' . $id_salle . 'b#';
         // $id_salle_existe = preg_match($id_salle_existe, $tous_les_id_salle);

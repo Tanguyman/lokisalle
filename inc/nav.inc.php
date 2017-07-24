@@ -43,7 +43,7 @@
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Administration<span class="caret"></span></a>';
                 echo '<ul class="dropdown-menu">';
 
-                  echo '<li><a href="' . URL . 'admin/gestion_boutique.php">Gestion boutique</a></li>';
+                  echo '<li><a href="' . URL . 'admin/gestion_produits.php">Gestion des Disponibilités Produits</a></li>';
                   echo '<li><a href="' . URL . 'admin/gestion_commandes.php">Gestion commande</a></li>';
                   echo '<li><a href="' . URL . 'admin/gestion_utilisateur.php">Gestion utilisateur</a></li>';
 

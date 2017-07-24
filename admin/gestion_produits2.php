@@ -163,7 +163,7 @@ $tous_les_id_produit = '';
         $options = $pdo->query("SELECT id_salle, titre, adresse, cp, ville, capacite FROM salle");
         while($option = $options->fetch(PDO::FETCH_ASSOC))
         {
-            $afficher_option .= '<option>' . $option['id_salle'] . ' - ' . $option['titre'] . ' - ' . $option['adresse'] . ' - ' . $option['cp'] . ' - ' . $option['ville'] . ' - ' . $option['capacite'] . '</option>';
+            $afficher_option .= '<option value="' . $option['id_salle'] . '">' . $option['id_salle'] . ' - ' . $option['titre'] . ' - ' . $option['adresse'] . ' - ' . $option['cp'] . ' - ' . $option['ville'] . ' - ' . $option['capacite'] . '</option>';
             // echo '<pre><p>$option</p>'; var_dump($option); echo '</pre>';
         }
 
@@ -380,100 +380,41 @@ if($_POST)
             }
             else
             {
+                $newDateArrivee = DateTime::createFromFormat('d-m-Y H:i', $date_arrivee);
+                $newDateDepart = DateTime::createFromFormat('d-m-Y H:i', $date_depart);
+                $date_arrivee_compare = $newDateArrivee->format('Y-m-d');
+                $date_depart_compare = $newDateDepart->format('Y-m-d');
                 
-                /*-----------------------------------------------------------------------*\
-                                    
-                                    2.1 - date_arrivee < date_depart (ok)
-
-                \*-----------------------------------------------------------------------*/
-                // rechanger le format date pour la class DateTime
-                    // http://php.net/manual/fr/datetime.createfromformat.php
-                    // $newDateArrivee = DateTime::createFromFormat('d-m-Y H:i', '28-02-2017 09:00');
-                    $newDateArrivee = DateTime::createFromFormat('d-m-Y H:i', $date_arrivee);
-                    $newDateDepart = DateTime::createFromFormat('d-m-Y H:i', $date_depart);
-                    $date_arrivee_compare = $newDateArrivee->format('Y-m-d');
-                    $date_depart_compare = $newDateDepart->format('Y-m-d');
-                    echo '<pre>$date_arrivee_compare : ' . $date_arrivee_compare . '<br>';
-                    echo '$date_depart_compare : ' . $date_depart_compare . '</pre>';
-
-                    $date_now = new DateTime("now");
-                    // http://php.net/manual/fr/datetime.diff.php
-                    echo '<pre>';
-                    echo '<br>$date_now : '; var_dump($date_now);
-                    echo '<br>$date_now : '; var_dump($date_now->date);
-                    echo '<br>$date_arrivee_compare < $date_now : '; var_dump($date_arrivee_compare < $date_now->date);
-                    echo '<br>$date_arrivee_compare > $date_now : '; var_dump($date_arrivee_compare > $date_now->date);
-                    echo '<br>$date_depart_compare < $date_arrivee_compare : '; var_dump($date_depart_compare < $date_arrivee_compare);
-                    echo '<br>$date_depart_compare > $date_arrivee_compare : '; var_dump($date_depart_compare > $date_arrivee_compare);
-                    echo '</pre>';
-                // if($date_arrivee_compare < $date_now || $date_depart_compare < $date_arrivee_compare)
-                if($date_arrivee_compare < $date_now->date)
+                function getDatesFromRange($start, $end)
                 {
-                    $message .= '<div class="row"><div class="col-sm-4 col-sm-offset-4 alert alert-danger" role="alert">Attention, la date d\'arrivée doit être supérieur à aujourd\'hui.</div></div>';
-                    $erreur = true;
-                }
-                /*-----------------------------------------------------------------------*\
-                                    
-                                    2.2 - date_arrivee < date_depart (ok)
-
-                \*-----------------------------------------------------------------------*/
-                elseif($date_arrivee_compare >= $date_depart_compare)
-                {
-                    $message .= '<div class="row"><div class="col-sm-4 col-sm-offset-4 alert alert-danger" role="alert">Attention, la date de départ doit être superieur à la date d\'arrivée</div></div>';
-                    $erreur = true;
-                }
-                else
-                {
-                    /*-----------------------------------------------------------------------*\
-                
-                                    2.3 - date_arrivee_new < date_arrivee_bdd && date_depart_new < date_arrivee_bdd
-                                    2.0 - Si l'id_produit n'existe pas
-
-                    \*-----------------------------------------------------------------------*/
-                    $newDateArrivee = DateTime::createFromFormat('d-m-Y H:i', $date_arrivee);
-                    $newDateDepart = DateTime::createFromFormat('d-m-Y H:i', $date_depart);
-                    $date_arrivee_compare = $newDateArrivee->format('Y-m-d');
-                    $date_depart_compare = $newDateDepart->format('Y-m-d');
-                    
-                    function getDatesFromRange($start, $end)
-                    {
-                        $interval = new DateInterval('P1D'); // per 1 Day
-                        $realEnd = new DateTime($end);
-                        $realEnd->add($interval);
-                        $period = new DatePeriod(new DateTime($start), $interval, $realEnd);
-                        foreach ($period as $date) {
-                            $array[] = $date->format('Y-m-d');
-                        }
-                        return $array;
+                    $interval = new DateInterval('P1D'); // per 1 Day
+                    $realEnd = new DateTime($end);
+                    $realEnd->add($interval);
+                    $period = new DatePeriod(new DateTime($start), $interval, $realEnd);
+                    foreach ($period as $date) {
+                        $array[] = $date->format('Y-m-d');
                     }
-
-                    $tab_dates = getDatesFromRange($date_arrivee_compare, $date_depart_compare);
-
-                    foreach($tab_dates AS $valeur)
-                    {
-                        $verif_date = $pdo->prepare("SELECT * FROM produit WHERE :valeur1 >= date_arrivee AND :valeur2 <= date_depart AND id_salle = :id_salle ");
-                        $verif_date->bindParam(":valeur1", $valeur, PDO::PARAM_STR);
-                        $verif_date->bindParam(":valeur2", $valeur, PDO::PARAM_STR);
-                        $verif_date->bindParam(":id_salle", $id_salle, PDO::PARAM_STR);
-                        $verif_date->execute();
-                        
-                        // $verif_date = $pdo->query("SELECT * FROM produit WHERE id_salle = $id_salle AND '$valeur' >= date_arrivee AND '$valeur' <= date_depart");
-
-                        if($verif_date->rowCount() > 0) {
-                            while($req = $verif_date->fetch(PDO::FETCH_ASSOC))
-                            {
-
-
-                            $message .= '<div class="row"><div class="col-sm-4 col-sm-offset-4 alert alert-danger" role="alert">$id_salle : ' . $req['id_salle'] . ' - $id_produit : ' . $req['id_produit'] . ' - $valeur : ' . $valeur . '</div></div>';
-                            $erreur = true;
-                            echo '<pre>'; var_dump($req); echo '</pre>';
-                            }
-                            // $message .= '<div class="row"><div class="col-sm-4 col-sm-offset-4 alert alert-danger" role="alert">$id_salle : ' . $id_salle . ' - $id_produit : ' . $id_produit . ' - $valeur : ' . $valeur . '</div></div>';
-
-                        }
-                    }
-                    
+                    return $array;
                 }
+
+                $tab_dates = getDatesFromRange($date_arrivee_compare, $date_depart_compare);
+
+                foreach($tab_dates AS $valeur)
+                {
+                    /*$verif_date = $pdo->prepare("SELECT * FROM produit WHERE :valeur1 >= date_arrivee AND :valeur2 <= date_depart AND id_salle = :id_salle ");
+                    $verif_date->bindParam(":valeur1", $valeur, PDO::PARAM_STR);
+                    $verif_date->bindParam(":valeur2", $valeur, PDO::PARAM_STR);
+                    $verif_date->bindParam(":id_salle", $id_salle, PDO::PARAM_STR);
+                    $verif_date->execute();
+                    */
+                    $verif_date = $pdo->query("SELECT * FROM produit WHERE id_salle = $id_salle AND '$valeur' >= date_arrivee AND '$valeur' <= date_depart");
+
+                    if($verif_date->rowCount() > 0) {
+                        $message .= '<div class="row"><div class="col-sm-4 col-sm-offset-4 alert alert-danger" role="alert">NOK</div></div>';
+                        $erreur = true;
+                    }
+                }
+
                 
             }
             /*-----------------------------------------------------------------------*\
@@ -578,7 +519,7 @@ require("../inc/nav.inc.php");
      <div class='row'>
         <div class="col-sm-10 col-sm-offset-1"> 
             
-            <form action="../admin/gestion_produits.php" method="post" enctype="">
+            <form action="../admin/gestion_produits2.php" method="post" enctype="">
 
                 <div class='row'>
                 

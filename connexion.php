@@ -11,7 +11,7 @@ if(isset($_GET['action']) && $_GET['action'] == 'deconnexion')
 // vérification si l'utilisateur est connecté, sinon redirection
 if(utilisateur_est_connecte())
 {
-    header("location:template_bootstrap.php");
+    //header("location:template_bootstrap.php");
 }
 
 // vérification de l'existence des indices du formulaire
